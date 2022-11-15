@@ -51,7 +51,7 @@ function printError(request, city) {
 function printElements(apiResponse, city) {
   const sunrise = new Date(apiResponse.sys.sunrise * 1000);
   document.querySelector('#showResponse').innerText = `The humidity in ${city} is ${apiResponse.main.humidity}%.
-  The temperature in Fahrenheit is ${1.8 * (apiResponse.main.temp - 273) + 32} degrees. Wind speed is ${apiResponse.wind.speed}. + ${sunrise}`;
+  The temperature in Fahrenheit is ${1.8 * (apiResponse.main.temp - 273) + 32} degree. Wind speed is ${apiResponse.wind.speed}. + ${sunrise}`;
 }
 
 function printForecast(apiResponse, city) {
