@@ -66,6 +66,7 @@ function printForecast(apiResponse, city) {
   let tempTot = 0;
   let ctr = 0;
   let aveTemp = 0;
+  
 
   list2.forEach(function (element, index)  {
     if(index != 0) {
