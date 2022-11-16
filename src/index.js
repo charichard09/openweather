@@ -1,68 +1,58 @@
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './css/styles.css';
+import WeatherService from './js/weather-service';
+import ForecastService from './js/forecast-service';
 
 // Business Logic
 
 
+// function that makes an api request
 function getWeather(city) {
-  let request = new XMLHttpRequest();
-  const url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.API_KEY}`;
+  let promise = WeatherService.getWeather(city);
 
-  request.addEventListener("loadend", function() {
-    const response = JSON.parse(this.responseText);
-    if (this.status === 200) {
-      printElements(response, city);
-    } else {
-      printError(this, city);
-    }
-
-    request.addEventListener("readystatechange", function() {
-      console.log(this.readyState);
-    });
+  promise.then(function(weatherDataArray) {
+    // function that will print weatherDataArray[0].main.humidity and weatherDataArray[0].main.temp to our HTML DOM
+    // with city weatherDataArray[1]
+    printElements(weatherDataArray);
+  }, function(errorArray) {
+    printError(errorArray);
   });
-
-  request.open("GET", url, true);
-  request.send();
 }
 
 function getForecast(city) {
-  let request = new XMLHttpRequest();
-  const url = `http://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${process.env.API_KEY}`;
+  let promise = ForecastService.getForecast(city);
 
-  request.addEventListener("loadend", function() {
-    const response = JSON.parse(this.responseText);
-    if (this.status === 200) {
-      printForecast(response, city);
-    } else {
-      printError(this, city);
-    }
+  promise.then(function(forecastDataArray) {
+    // function that will print weatherDataArray[0].main.humidity and weatherDataArray[0].main.temp to our HTML DOM
+    // with city weatherDataArray[1]
+    printForecast(forecastDataArray);
+  }, function(errorArray) {
+    printError(errorArray);
   });
-
-  request.open("GET", url, true);
-  request.send();
 }
 
 // UI Logic
-function printError(request, city) {
-  document.querySelector('#showresponse').innerText = `There was an error accessing the weather data for ${city}: ${request.status} ${request.statusText}`;
+function printError(error) {
+  document.querySelector('#showresponse').innerText = `There was an error accessing the weather data for 
+  ${error[2]}: ${error[0].status} ${error[0].statusText} ${error[0].statusText}: ${error[1].message}`;
 }
 
-function printElements(apiResponse, city) {
-  const sunrise = new Date(apiResponse.sys.sunrise * 1000);
-  document.querySelector('#showResponse').innerText = `The humidity in ${city} is ${apiResponse.main.humidity}%.
-  The temperature in Fahrenheit is ${1.8 * (apiResponse.main.temp - 273) + 32} degree. Wind speed is ${apiResponse.wind.speed}. + ${sunrise}`;
+function printElements(data) {
+  const sunrise = new Date(data[0].sys.sunrise * 1000);
+  document.querySelector('#showResponse').innerText = `The humidity in ${data[1]} is ${data[0].main.humidity}%.
+  The temperature in Fahrenheit is ${1.8 * (data[0].main.temp - 273) + 32} degree. Wind speed is ${data[0].wind.speed}. + ${sunrise}`;
 }
 
-function printForecast(apiResponse, city) {
+function printForecast(data) {
   const weekArray = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"]; 
-  const dayOne = new Date(apiResponse.list[5].dt * 1000);
-  const dayTwo = new Date(apiResponse.list[11].dt * 1000);
-  document.querySelector('#showResponse').innerText += `The 5 day forecast in ${city} is:
-  ${dayOne.getMonth() + 1}/${dayOne.getDate()} ${weekArray[dayOne.getDay()]}  ${(((apiResponse.list[0].main.temp) - 273) +32).toFixed(1)}.
-  ${dayTwo.getMonth() + 1}/${dayTwo.getDate()} ${weekArray[dayTwo.getDay()]}  ${(((apiResponse.list[0].main.temp) - 273) +32).toFixed(1)}`;
+  const dayOne = new Date(data[0].list[5].dt * 1000);
+  const dayTwo = new Date(data[0].list[11].dt * 1000);
+  document.querySelector('#showResponse').innerText += `The 5 day forecast in ${data[1]} is:
+  ${dayOne.getMonth() + 1}/${dayOne.getDate()} ${weekArray[dayOne.getDay()]}  ${(((data[0].list[0].main.temp) - 273) +32).toFixed(1)}.
+  ${dayTwo.getMonth() + 1}/${dayTwo.getDate()} ${weekArray[dayTwo.getDay()]}  ${(((data[0].list[0].main.temp) - 273) +32).toFixed(1)}`;
 
-  let list2 = apiResponse.list;
+  let list2 = data[0].list;
   let tempTot = 0;
   let ctr = 0;
   let aveTemp = 0;
